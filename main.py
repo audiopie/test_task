@@ -13,17 +13,27 @@ class JsonToHtml:
 
 
     def render(self,data):
-        item = self.convert_data(data)
-        print(item)
+        if isinstance(data, list):
+            item = self.convert_list(data)
         return item
+
+    def convert_list(self, list_data):
+        items = ''.join(map(self.render_list, list_data))
+        return ''.join(['<ul>', items, '</ul>'])
+
+
+    def render_list(self, tags):
+        return '<li>{}</li>'.format(self.convert_data(tags))
 
 
     def convert_data(self, words):
         list_items = []
-        for key in words:
-            for k, v in key.items():
+        for k,v in words.items():
+            if isinstance(v, list):
+                item = self.render_list(v)
+            else:
                 tag_open, tag_close = self.grab_tag(k)
-                list_items.append('<'+ tag_open + '>' + v + '</' + tag_close + '>')
+            list_items.append('<'+ tag_open + '>' + v + '</' + tag_close + '>')
         return ''.join(list_items)
 
 
