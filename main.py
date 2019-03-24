@@ -1,11 +1,14 @@
 import re
 import json
 from conf import DATA_FILE_PATH
+from html import escape
 
 
 class JsonToHtml:
 
     find_tag = re.compile(r'^\w+')
+    find_id = re.compile(r'\#([^#\.]+)')
+    find_class = re.compile(r'\.([^#\.]+)')
 
 
     def load(self): # Загружаем json файл
@@ -34,7 +37,7 @@ class JsonToHtml:
             if isinstance(v, list):
                 item = self.convert_list(v)
             else:
-                item = v
+                item = escape(v)
                 tag_open, tag_close = self.grab_tag(k)
             list_items.append('<'+ tag_open + '>' + item + '</' + tag_close + '>')
         return ''.join(list_items)
@@ -42,7 +45,11 @@ class JsonToHtml:
 
     def grab_tag(self, value):
         tag = self.find_tag.findall(value)[0]
-        return tag, tag
+        ids = self.find_id.findall(value)
+        ids = ' id="%s"' % ' '.join(ids) if ids else ''
+        cls = self.find_class.findall(value)
+        cls = ' class="%s"' % ' '.join(cls) if cls else ''
+        return tag + ids + cls, tag
 
 
 if __name__ == '__main__':
